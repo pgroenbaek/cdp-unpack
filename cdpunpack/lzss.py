@@ -111,9 +111,7 @@ def decompress_huffman(
             break
 
         if symbol > EOF_SYMBOL:
-            raise CdpError(
-                f"invalid Huffman symbol {symbol}"
-            )
+            raise CdpError(f"invalid Huffman symbol {symbol}")
 
         if symbol < 256:
             output.append(symbol)
@@ -122,9 +120,7 @@ def decompress_huffman(
             table_index = symbol - 256
 
             if table_index < 0 or table_index >= len(LENGTH_TABLE):
-                raise CdpError(
-                    f"invalid length symbol {symbol}"
-                )
+                raise CdpError(f"invalid length symbol {symbol}")
 
             base, extra = LENGTH_TABLE[table_index]
 

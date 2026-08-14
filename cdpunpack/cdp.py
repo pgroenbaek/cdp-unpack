@@ -240,29 +240,19 @@ def parse_tags(
 def parse_cdp(data: bytes) -> CdpDocument:
 
     if len(data) < 16:
-        raise CdpError(
-            "file is smaller than CDP header"
-        )
+        raise CdpError("file is smaller than CDP header")
 
     if data[:4] != b"ACS$":
-        raise CdpError(
-            "not a CDP file: missing ACS$ magic"
-        )
+        raise CdpError("not a CDP file: missing ACS$ magic")
 
     version = read_uint32(data, 4)
     reserved = read_uint32(data, 8)
     body_length = read_uint32(data, 12)
 
     if body_length > len(data) - 16:
-        raise CdpError(
-            "CDP body length exceeds file size"
-        )
+        raise CdpError("CDP body length exceeds file size")
 
-    tags = parse_tags(
-        data,
-        16,
-        len(data),
-    )
+    tags = parse_tags(data, 16, len(data))
 
     return CdpDocument(
         version=version,
