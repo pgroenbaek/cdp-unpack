@@ -26,6 +26,9 @@ import sys
 import argparse
 from pathlib import Path
 
+from .cdp import parse_cdp, print_tag_tree, extract_document
+from .error import CdpError
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(
@@ -72,22 +75,22 @@ def main() -> int:
 
         print(f"Size: {len(data):,} bytes")
 
-        doc = parse_cdp(data)
+        document = parse_cdp(data)
 
-        print(f"CDP version: {doc.version}")
-        print(f"Reserved: 0x{doc.reserved:08x}")
-        print(f"Advertised body: {doc.body_length:,} bytes")
+        print(f"CDP version: {document.version}")
+        print(f"Reserved: 0x{document.reserved:08x}")
+        print(f"Advertised body: {document.body_length:,} bytes")
 
         if args.list:
             print()
-            print_tag_tree(doc.tags)
+            print_tag_tree(document.tags)
             return 0
 
         print()
         print(f"Extracting to: {output_path}")
 
         asset_count, file_count = extract_document(
-            doc,
+            document,
             output_path,
         )
 
