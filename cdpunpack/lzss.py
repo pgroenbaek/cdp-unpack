@@ -106,25 +106,25 @@ def decompress_huffman(
     output = bytearray()
 
     while len(output) < uncomp_size:
-        sym = lit_tree.decode(br)
+        symbol = lit_tree.decode(br)
 
-        if sym == EOF_SYMBOL:
+        if symbol == EOF_SYMBOL:
             break
 
-        if sym > EOF_SYMBOL:
+        if symbol > EOF_SYMBOL:
             raise CdpError(
-                f"invalid Huffman symbol {sym}"
+                f"invalid Huffman symbol {symbol}"
             )
 
-        if sym < 256:
-            output.append(sym)
+        if symbol < 256:
+            output.append(symbol)
 
         else:
-            table_index = sym - 256
+            table_index = symbol - 256
 
             if table_index < 0 or table_index >= len(LENGTH_TABLE):
                 raise CdpError(
-                    f"invalid length symbol {sym}"
+                    f"invalid length symbol {symbol}"
                 )
 
             base, extra = LENGTH_TABLE[table_index]
@@ -136,12 +136,12 @@ def decompress_huffman(
 
             match_len = base + extra_val + 3
 
-            dist_sym = dist_tree.decode(br)
+            dist_symbol = dist_tree.decode(br)
 
             dist_extra = br.read_bits(dist_extra_bits)
 
             distance = (
-                (dist_sym << dist_extra_bits)
+                (dist_symbol << dist_extra_bits)
                 | dist_extra
             ) & dist_mask
 

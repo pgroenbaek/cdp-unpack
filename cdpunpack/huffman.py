@@ -46,13 +46,13 @@ class AdaptiveHuffmanTree:
         self.freq = [0] * self.total_nodes
         self.parent = [0] * self.total_nodes
         self.child = [0] * self.total_nodes
-        self.sym_to_node = [0] * n
+        self.symbol_to_node = [0] * n
 
         # Leaves.
         for i in range(n):
             self.freq[i] = 1
             self.child[i] = i | LEAF_FLAG
-            self.sym_to_node[i] = i
+            self.symbol_to_node[i] = i
 
         # Internal nodes, bottom-up.
         j = 0
@@ -85,14 +85,14 @@ class AdaptiveHuffmanTree:
             if depth > 50:
                 raise CdpError("Huffman tree decode depth exceeded")
 
-        sym = v & ~LEAF_FLAG
+        symbol = v & ~LEAF_FLAG
 
-        if sym >= self.num_leaves:
+        if symbol >= self.num_leaves:
             raise CdpError("Huffman symbol out of range")
 
-        self.update(sym)
+        self.update(symbol)
 
-        return sym
+        return symbol
 
     def update(self, symbol: int) -> None:
         if symbol < 0 or symbol >= self.num_leaves:
@@ -101,7 +101,7 @@ class AdaptiveHuffmanTree:
         if self.freq[self.root_idx] > REBUILD_THRESHOLD:
             self.rebuild()
 
-        i = self.sym_to_node[symbol]
+        i = self.symbol_to_node[symbol]
 
         while True:
             self.freq[i] += 1
@@ -132,12 +132,12 @@ class AdaptiveHuffmanTree:
                     self.parent[cj] = i
                     self.parent[cj + 1] = i
                 else:
-                    sym = cj & ~LEAF_FLAG
+                    symbol = cj & ~LEAF_FLAG
 
-                    if sym >= self.num_leaves:
+                    if symbol >= self.num_leaves:
                         raise CdpError("invalid Huffman leaf")
 
-                    self.sym_to_node[sym] = i
+                    self.symbol_to_node[symbol] = i
 
                 # Point ci's children/symbol at position j.
                 if (ci & LEAF_FLAG) == 0:
@@ -147,12 +147,12 @@ class AdaptiveHuffmanTree:
                     self.parent[ci] = j
                     self.parent[ci + 1] = j
                 else:
-                    sym = ci & ~LEAF_FLAG
+                    symbol = ci & ~LEAF_FLAG
 
-                    if sym >= self.num_leaves:
+                    if symbol >= self.num_leaves:
                         raise CdpError("invalid Huffman leaf")
 
-                    self.sym_to_node[sym] = j
+                    self.symbol_to_node[symbol] = j
 
                 self.freq[i], self.freq[j] = (
                     self.freq[j],
@@ -168,15 +168,15 @@ class AdaptiveHuffmanTree:
 
                 i = j
 
-            p = self.parent[i]
+            parent = self.parent[i]
 
-            if p == i or p == self.root_idx:
+            if parent == i or parent == self.root_idx:
                 break
 
-            if p >= self.total_nodes:
+            if parent >= self.total_nodes:
                 raise CdpError("invalid Huffman parent")
 
-            i = p
+            i = parent
 
         self.freq[self.root_idx] += 1
 
@@ -251,93 +251,93 @@ class AdaptiveHuffmanTree:
                     scan >= 0
                     and self.freq[scan] > new_freq
                 ):
-                    c = self.child[scan]
+                    child = self.child[scan]
 
-                    if (c & LEAF_FLAG) == 0:
-                        if c + 1 >= self.total_nodes:
+                    if (child & LEAF_FLAG) == 0:
+                        if child + 1 >= self.total_nodes:
                             raise CdpError(
                                 "invalid Huffman child during rebuild"
                             )
 
-                        self.parent[c] += 1
-                        self.parent[c + 1] += 1
+                        self.parent[child] += 1
+                        self.parent[child + 1] += 1
 
                     else:
-                        sym = c & ~LEAF_FLAG
+                        symbol = child & ~LEAF_FLAG
 
-                        if sym >= self.num_leaves:
+                        if symbol >= self.num_leaves:
                             raise CdpError(
                                 "invalid Huffman symbol during rebuild"
                             )
 
-                        self.sym_to_node[sym] += 1
+                        self.symbol_to_node[symbol] += 1
 
                     scan -= 1
 
-                pos = scan + 1
-                count = slot - pos
+                position = scan + 1
+                count = slot - position
 
                 if count > 0:
                     for k in range(count - 1, -1, -1):
-                        self.freq[pos + k + 1] = self.freq[pos + k]
-                        self.child[pos + k + 1] = self.child[pos + k]
+                        self.freq[position + k + 1] = self.freq[position + k]
+                        self.child[position + k + 1] = self.child[position + k]
 
-                insert_at = pos
+                insert_at = position
 
             # Leaf-promotion path
             elif remaining_leaves > 0:
-                scan_pos = next_scan
-                dst = slot
-                nxt = next_scan
+                scan_position = next_scan
+                destination = slot
+                next_destination = next_scan
 
                 while True:
-                    while scan_pos < root_idx:
-                        if self.child[scan_pos] & LEAF_FLAG:
+                    while scan_position < root_idx:
+                        if self.child[scan_position] & LEAF_FLAG:
                             break
 
-                        scan_pos += 1
+                        scan_position += 1
 
                     if (
-                        scan_pos >= root_idx
-                        or self.freq[scan_pos] >= new_freq
+                        scan_position >= root_idx
+                        or self.freq[scan_position] >= new_freq
                     ):
                         break
 
-                    self.freq[dst] = self.freq[scan_pos]
-                    self.child[dst] = self.child[scan_pos]
-                    self.parent[dst] = UNPROCESSED
+                    self.freq[destination] = self.freq[scan_position]
+                    self.child[destination] = self.child[scan_position]
+                    self.parent[destination] = UNPROCESSED
 
-                    c = self.child[scan_pos]
+                    child = self.child[scan_position]
 
-                    if (c & LEAF_FLAG) == 0:
+                    if (child & LEAF_FLAG) == 0:
                         raise CdpError(
                             "leaf promotion encountered non-leaf"
                         )
 
-                    sym = c & ~LEAF_FLAG
+                    symbol = child & ~LEAF_FLAG
 
-                    if sym >= self.num_leaves:
+                    if symbol >= self.num_leaves:
                         raise CdpError(
                             "invalid symbol during leaf promotion"
                         )
 
-                    self.sym_to_node[sym] = dst
+                    self.symbol_to_node[symbol] = destination
 
-                    dst = nxt
+                    destination = next_destination
 
-                    self.child[scan_pos] = 0
-                    nxt += 1
+                    self.child[scan_position] = 0
+                    next_destination += 1
 
-                    node_scan = nxt
+                    node_scan = next_destination
 
                     remaining_leaves -= 1
 
                     if remaining_leaves <= 0:
                         break
 
-                    scan_pos += 1
+                    scan_position += 1
 
-                insert_at = dst
+                insert_at = destination
 
             self.freq[insert_at] = new_freq
             self.child[insert_at] = left
