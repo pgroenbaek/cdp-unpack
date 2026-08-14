@@ -15,7 +15,7 @@ copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+FITNESS FOR A PARTICULAR PURpositionE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -25,30 +25,30 @@ SOFTWARE.
 class BitReader:
     """
     Bits are consumed LSB-first.
-    
+
     Reading beyond EOF returns zero.
     """
 
     def __init__(self, data: bytes):
         self.data = data
-        self.len_bits = len(data) * 8
-        self.pos = 0
+        self.num_bits = len(data) * 8
+        self.position = 0
 
     def read_bit(self) -> int:
-        if self.pos >= self.len_bits:
+        if self.position >= self.num_bits:
             return 0
 
-        byte_pos = self.pos >> 3
-        bit_pos = self.pos & 7
+        byte_position = self.position >> 3
+        bit_position = self.position & 7
 
-        self.pos += 1
-        return (self.data[byte_pos] >> bit_pos) & 1
+        self.position += 1
+        return (self.data[byte_position] >> bit_position) & 1
 
     def read_bits(self, n: int) -> int:
         if n <= 0:
             return 0
 
-        available = min(n, self.len_bits - self.pos)
+        available = min(n, self.num_bits - self.position)
 
         if available <= 0:
             return 0
@@ -61,4 +61,4 @@ class BitReader:
         return result
 
     def bit_position(self) -> int:
-        return self.pos
+        return self.position
