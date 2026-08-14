@@ -19,9 +19,10 @@ echo "==> Building wheel + source distribution"
 echo "==> Building Nuitka executable"
 "$PYTHON" -m nuitka \
     --onefile \
+    --python-flag=-m \
     --output-dir="$DIST_DIR" \
     --output-filename=cdpunpack \
-    "$ROOT_DIR/cdpunpack/__main__.py"
+    "$ROOT_DIR/cdpunpack"
 
 echo
 echo "==> Build complete:"

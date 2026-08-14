@@ -26,7 +26,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="cdpunpack",
-    version="0.0.1b1",
+    version="0.0.1",
     packages=find_packages(),
     install_requires=[
     ],

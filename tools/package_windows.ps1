@@ -23,9 +23,10 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "==> Building Nuitka executable"
 & $Python -m nuitka `
     --onefile `
+    --python-flag=-m `
     "--output-dir=$DistDir" `
     "--output-filename=cdpunpack.exe" `
-    "$RootDir\cdpunpack\__main__.py"
+    "$RootDir\cdpunpack"
 
 if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
