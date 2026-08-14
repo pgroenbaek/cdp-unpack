@@ -89,7 +89,7 @@ def copy_match(
 
 def decompress_huffman(
     stream: bytes,
-    uncomp_size: int,
+    uncompressed_size: int,
     dist_bits_total: int,
     num_dist_symbols: int,
     dist_extra_bits: int,
@@ -104,7 +104,7 @@ def decompress_huffman(
 
     output = bytearray()
 
-    while len(output) < uncomp_size:
+    while len(output) < uncompressed_size:
         symbol = lit_tree.decode(br)
 
         if symbol == EOF_SYMBOL:
@@ -144,17 +144,17 @@ def decompress_huffman(
             if distance == 0:
                 distance = 1
 
-            copy_match(output, distance, match_len, uncomp_size)
+            copy_match(output, distance, match_len, uncompressed_size)
 
-    if len(output) > uncomp_size:
-        del output[uncomp_size:]
+    if len(output) > uncompressed_size:
+        del output[uncompressed_size:]
 
     return bytes(output)
 
 
 def decompress_bitstream(
     stream: bytes,
-    uncomp_size: int,
+    uncompressed_size: int,
     dist_bits_total: int,
     dist_extra_bits: int,
 ) -> bytes:
@@ -174,11 +174,11 @@ def decompress_bitstream(
     # Mode 0
     if dist_extra_bits == 0:
 
-        while len(output) < uncomp_size:
+        while len(output) < uncompressed_size:
             flags = br.read_bits(32)
             mask = 1
 
-            while mask != 0 and len(output) < uncomp_size:
+            while mask != 0 and len(output) < uncompressed_size:
                 if (flags & mask) == 0:
 
                     # Literal.
@@ -222,22 +222,21 @@ def decompress_bitstream(
 
                     match_len = len_code + 3
 
-                    copy_match(output, distance, match_len, uncomp_size)
+                    copy_match(output, distance, match_len, uncompressed_size)
 
                     mask <<= 1
 
-        if len(output) > uncomp_size:
-            del output[uncomp_size:]
+        if len(output) > uncompressed_size:
+            del output[uncompressed_size:]
 
         return bytes(output)
 
     # Modes 1 and 2
-    while len(output) < uncomp_size:
-
+    while len(output) < uncompressed_size:
         flags = br.read_bits(32)
         mask = 1
 
-        while mask != 0 and len(output) < uncomp_size:
+        while mask != 0 and len(output) < uncompressed_size:
             if (flags & mask) == 0:
 
                 # First bit = 0.
@@ -255,7 +254,7 @@ def decompress_bitstream(
                     run_len = br.read_bits(8) + 3
 
                     for _ in range(run_len):
-                        if len(output) >= uncomp_size:
+                        if len(output) >= uncompressed_size:
                             break
 
                         output.append(br.read_bits(8))
@@ -278,25 +277,25 @@ def decompress_bitstream(
 
                 match_len = len_code + 3
 
-                copy_match(output, distance, match_len, uncomp_size)
+                copy_match(output, distance, match_len, uncompressed_size)
 
                 mask <<= 1
 
-    if len(output) > uncomp_size:
-        del output[uncomp_size:]
+    if len(output) > uncompressed_size:
+        del output[uncompressed_size:]
 
     return bytes(output)
 
 
 def decompress_lzss(
-    comp_data: bytes,
-    uncomp_size: int,
+    compressed_data: bytes,
+    uncompressed_size: int,
 ) -> bytes:
 
-    if not comp_data:
+    if not compressed_data:
         raise CdpError("empty LZSS blob")
 
-    first_byte = comp_data[0]
+    first_byte = compressed_data[0]
 
     mode = (first_byte >> 4) & 3
     level = first_byte & 0xF
@@ -304,29 +303,29 @@ def decompress_lzss(
     # Stored.
     if level == 0:
         end = min(
-            1 + uncomp_size,
-            len(comp_data),
+            1 + uncompressed_size,
+            len(compressed_data),
         )
 
-        result = comp_data[1:end]
+        result = compressed_data[1:end]
 
-        if len(result) != uncomp_size:
+        if len(result) != uncompressed_size:
             raise CdpError(
                 "stored blob is shorter than declared "
                 f"uncompressed size "
-                f"({len(result)} != {uncomp_size})"
+                f"({len(result)} != {uncompressed_size})"
             )
 
         return result
 
     dist_bits_total, num_dist_symbols, dist_extra_bits = mode_params(mode)
 
-    stream = comp_data[1:]
+    stream = compressed_data[1:]
 
     if level < 7:
         result = decompress_bitstream(
             stream,
-            uncomp_size,
+            uncompressed_size,
             dist_bits_total,
             dist_extra_bits,
         )
@@ -334,17 +333,17 @@ def decompress_lzss(
     else:
         result = decompress_huffman(
             stream,
-            uncomp_size,
+            uncompressed_size,
             dist_bits_total,
             num_dist_symbols,
             dist_extra_bits,
         )
 
-    if len(result) != uncomp_size:
+    if len(result) != uncompressed_size:
         raise CdpError(
             "decompressed size mismatch: "
             f"got {len(result)}, "
-            f"expected {uncomp_size}"
+            f"expected {uncompressed_size}"
         )
 
     return result
