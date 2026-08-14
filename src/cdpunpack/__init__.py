@@ -1,5 +1,5 @@
 """
-This file is part of CDPUnpack.
+This file is part of CdpUnpack.
 
 Copyright (C) 2026 Peter Grønbæk Andersen <peter@grnbk.io>
 
