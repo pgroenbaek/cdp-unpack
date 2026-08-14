@@ -136,7 +136,6 @@ def decompress_huffman(
             match_len = base + extra_val + 3
 
             dist_symbol = dist_tree.decode(br)
-
             dist_extra = br.read_bits(dist_extra_bits)
 
             distance = ((dist_symbol << dist_extra_bits) | dist_extra) & dist_mask
@@ -180,7 +179,6 @@ def decompress_bitstream(
 
             while mask != 0 and len(output) < uncompressed_size:
                 if (flags & mask) == 0:
-
                     # Literal.
                     output.append(br.read_bits(8))
 
@@ -238,7 +236,6 @@ def decompress_bitstream(
 
         while mask != 0 and len(output) < uncompressed_size:
             if (flags & mask) == 0:
-
                 # First bit = 0.
                 mask <<= 1
 
