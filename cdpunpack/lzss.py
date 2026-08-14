@@ -75,7 +75,6 @@ def copy_match(
     Important: bytes are appended one at a time, which naturally permits
     overlapping LZSS matches.
     """
-
     for _ in range(match_len):
         if len(output) >= max_size:
             break
@@ -140,20 +139,12 @@ def decompress_huffman(
 
             dist_extra = br.read_bits(dist_extra_bits)
 
-            distance = (
-                (dist_symbol << dist_extra_bits)
-                | dist_extra
-            ) & dist_mask
+            distance = ((dist_symbol << dist_extra_bits) | dist_extra) & dist_mask
 
             if distance == 0:
                 distance = 1
 
-            copy_match(
-                output,
-                distance,
-                match_len,
-                uncomp_size,
-            )
+            copy_match(output, distance, match_len, uncomp_size)
 
     if len(output) > uncomp_size:
         del output[uncomp_size:]
@@ -184,20 +175,14 @@ def decompress_bitstream(
     if dist_extra_bits == 0:
 
         while len(output) < uncomp_size:
-
             flags = br.read_bits(32)
             mask = 1
 
-            while (
-                mask != 0
-                and len(output) < uncomp_size
-            ):
+            while mask != 0 and len(output) < uncomp_size:
                 if (flags & mask) == 0:
 
                     # Literal.
-                    output.append(
-                        br.read_bits(8)
-                    )
+                    output.append(br.read_bits(8))
 
                     mask <<= 1
 
@@ -208,11 +193,7 @@ def decompress_bitstream(
                     if mask == 0:
                         break
 
-                    len_code = (
-                        1
-                        if flags & mask
-                        else 0
-                    )
+                    len_code = 1 if flags & mask else 0
 
                     mask <<= 1
 
@@ -241,12 +222,7 @@ def decompress_bitstream(
 
                     match_len = len_code + 3
 
-                    copy_match(
-                        output,
-                        distance,
-                        match_len,
-                        uncomp_size,
-                    )
+                    copy_match(output, distance, match_len, uncomp_size)
 
                     mask <<= 1
 
@@ -261,10 +237,7 @@ def decompress_bitstream(
         flags = br.read_bits(32)
         mask = 1
 
-        while (
-            mask != 0
-            and len(output) < uncomp_size
-        ):
+        while mask != 0 and len(output) < uncomp_size:
             if (flags & mask) == 0:
 
                 # First bit = 0.
@@ -275,9 +248,7 @@ def decompress_bitstream(
 
                 if (flags & mask) == 0:
                     # 00 = literal.
-                    output.append(
-                        br.read_bits(8)
-                    )
+                    output.append(br.read_bits(8))
 
                 else:
                     # 01 = short copy.
@@ -287,9 +258,7 @@ def decompress_bitstream(
                         if len(output) >= uncomp_size:
                             break
 
-                        output.append(
-                            br.read_bits(8)
-                        )
+                        output.append(br.read_bits(8))
 
                 mask <<= 1
 
@@ -299,9 +268,7 @@ def decompress_bitstream(
 
                 distance = word & dist_mask
 
-                len_code = (
-                    word >> offset_shift
-                ) & len_overflow
+                len_code = (word >> offset_shift) & len_overflow
 
                 if len_code == len_overflow:
                     len_code = br.read_bits(8)
@@ -311,12 +278,7 @@ def decompress_bitstream(
 
                 match_len = len_code + 3
 
-                copy_match(
-                    output,
-                    distance,
-                    match_len,
-                    uncomp_size,
-                )
+                copy_match(output, distance, match_len, uncomp_size)
 
                 mask <<= 1
 
@@ -357,11 +319,7 @@ def decompress_lzss(
 
         return result
 
-    (
-        dist_bits_total,
-        num_dist_symbols,
-        dist_extra_bits,
-    ) = mode_params(mode)
+    dist_bits_total, num_dist_symbols, dist_extra_bits = mode_params(mode)
 
     stream = comp_data[1:]
 

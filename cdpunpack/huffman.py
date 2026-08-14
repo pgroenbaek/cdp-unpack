@@ -107,16 +107,10 @@ class AdaptiveHuffmanTree:
             self.freq[i] += 1
             f = self.freq[i]
 
-            if (
-                i + 1 < self.total_nodes
-                and self.freq[i + 1] < f
-            ):
+            if i + 1 < self.total_nodes and self.freq[i + 1] < f:
                 j = i + 2
 
-                while (
-                    j < self.total_nodes
-                    and self.freq[j] < f
-                ):
+                while j < self.total_nodes and self.freq[j] < f:
                     j += 1
 
                 j -= 1
@@ -233,24 +227,14 @@ class AdaptiveHuffmanTree:
             node_scan += 1
             next_scan = node_scan
 
-            new_freq = (
-                self.freq[left]
-                + self.freq[right]
-            )
-
+            new_freq = self.freq[left] + self.freq[right]
             insert_at = slot
 
             # Shift-right path
-            if (
-                slot > 0
-                and self.freq[slot - 1] > new_freq
-            ):
+            if slot > 0 and self.freq[slot - 1] > new_freq:
                 scan = slot - 1
 
-                while (
-                    scan >= 0
-                    and self.freq[scan] > new_freq
-                ):
+                while scan >= 0 and self.freq[scan] > new_freq:
                     child = self.child[scan]
 
                     if (child & LEAF_FLAG) == 0:
@@ -297,10 +281,7 @@ class AdaptiveHuffmanTree:
 
                         scan_position += 1
 
-                    if (
-                        scan_position >= root_idx
-                        or self.freq[scan_position] >= new_freq
-                    ):
+                    if scan_position >= root_idx or self.freq[scan_position] >= new_freq:
                         break
 
                     self.freq[destination] = self.freq[scan_position]
