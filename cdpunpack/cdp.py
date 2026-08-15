@@ -74,11 +74,7 @@ def read_float32(data: bytes, offset: int) -> float:
     return struct.unpack_from("<f", data, offset)[0]
 
 
-def parse_tags(
-    data: bytes,
-    offset: int,
-    end: int,
-) -> List[Tag]:
+def parse_tags(data: bytes, offset: int, end: int) -> List[Tag]:
 
     tags: List[Tag] = []
 
@@ -98,15 +94,8 @@ def parse_tags(
             if offset + name_len > end:
                 break
 
-            name_bytes = data[
-                offset:
-                offset + name_len - 1
-            ]
-
-            name = name_bytes.decode(
-                "utf-8",
-                errors="replace",
-            )
+            name_bytes = data[offset : offset + name_len - 1]
+            name = name_bytes.decode("utf-8", errors="replace")
 
             offset += name_len
 
@@ -130,11 +119,7 @@ def parse_tags(
         value_data = data[offset:value_end]
 
         if tag_type == 0x00:
-            children = parse_tags(
-                data,
-                offset,
-                value_end,
-            )
+            children = parse_tags(data, offset, value_end)
 
             tag = Tag(
                 tag_type=tag_type,
@@ -147,9 +132,7 @@ def parse_tags(
             pos = 0
 
             while pos + 4 <= len(value_data):
-                values.append(
-                    read_int32(value_data, pos)
-                )
+                values.append(read_int32(value_data, pos))
                 pos += 4
 
             tag = Tag(
@@ -163,9 +146,7 @@ def parse_tags(
             pos = 0
 
             while pos + 4 <= len(value_data):
-                values.append(
-                    read_float32(value_data, pos)
-                )
+                values.append(read_float32(value_data, pos))
                 pos += 4
 
             tag = Tag(
@@ -175,14 +156,8 @@ def parse_tags(
             )
 
         elif tag_type == 0x03:
-            string_bytes = (
-                value_data.split(b"\0", 1)[0]
-            )
-
-            value = string_bytes.decode(
-                "utf-8",
-                errors="replace",
-            )
+            string_bytes = value_data.split(b"\0", 1)[0]
+            value = string_bytes.decode("utf-8", errors="replace")
 
             tag = Tag(
                 tag_type=tag_type,
@@ -204,17 +179,8 @@ def parse_tags(
             )
 
         elif tag_type == 0x0D:
-            user_id = (
-                read_uint32(value_data, 0)
-                if len(value_data) >= 4
-                else 0
-            )
-
-            content_id = (
-                read_int32(value_data, 4)
-                if len(value_data) >= 8
-                else 0
-            )
+            user_id = read_uint32(value_data, 0) if len(value_data) >= 4 else 0
+            content_id = read_int32(value_data, 4) if len(value_data) >= 8 else 0
 
             tag = Tag(
                 tag_type=tag_type,
@@ -262,10 +228,7 @@ def parse_cdp(data: bytes) -> CdpDocument:
     )
 
 
-def format_kuid(
-    user_id: int,
-    content_id: int,
-) -> str:
+def format_kuid(user_id: int, content_id: int) -> str:
 
     flags = (user_id >> 22) & 0x3
     uid = user_id & 0x3FFFFF
@@ -337,10 +300,7 @@ def tag_to_json(tag: Tag):
     return None
 
 
-def build_config_json(
-    asset_name: str,
-    children: List[Tag],
-) -> bytes:
+def build_config_json(asset_name: str, children: List[Tag]) -> bytes:
 
     obj = {
         "_container": asset_name,
@@ -409,10 +369,7 @@ def safe_component(component: str) -> str:
     return component
 
 
-def safe_join(
-    root: Path,
-    relative: str,
-) -> Path:
+def safe_join(root: Path, relative: str) -> Path:
 
     parts = relative.replace("\\", "/").split("/")
 
@@ -422,9 +379,7 @@ def safe_join(
         if part == "":
             continue
 
-        clean.append(
-            safe_component(part)
-        )
+        clean.append(safe_component(part))
 
     destination = root.joinpath(*clean)
 
@@ -438,10 +393,7 @@ def safe_join(
     return destination
 
 
-def decompress_file_blob(
-    tag_name: str,
-    data: bytes,
-) -> bytes:
+def decompress_file_blob(tag_name: str, data: bytes) -> bytes:
 
     if len(data) < 4:
         raise CdpError(
@@ -524,9 +476,7 @@ def extract_file_tree(
     return count
 
 
-def find_files_container(
-    children: List[Tag],
-) -> Optional[Tag]:
+def find_files_container(children: List[Tag]) -> Optional[Tag]:
 
     for tag in children:
         if tag.tag_type == 0x00 and tag.name == "files":
@@ -535,14 +485,11 @@ def find_files_container(
     return None
 
 
-def extract_document(
-    doc: CdpDocument,
-    output_root: Path,
-) -> Tuple[int, int]:
+def extract_document(document: CdpDocument, output_root: Path) -> Tuple[int, int]:
 
     assets_container = None
 
-    for tag in doc.tags:
+    for tag in document.tags:
         if tag.tag_type == 0x00 and tag.name == "assets":
             assets_container = tag
             break
@@ -601,10 +548,7 @@ def extract_document(
     return asset_count, file_count
 
 
-def print_tag_tree(
-    tags: List[Tag],
-    depth: int = 0,
-) -> None:
+def print_tag_tree(tags: List[Tag], depth: int = 0) -> None:
 
     indent = "  " * depth
 

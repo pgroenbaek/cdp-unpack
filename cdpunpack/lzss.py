@@ -259,7 +259,6 @@ def decompress_bitstream(
                 word = br.read_bits(16)
 
                 distance = word & dist_mask
-
                 len_code = (word >> offset_shift) & len_overflow
 
                 if len_code == len_overflow:
