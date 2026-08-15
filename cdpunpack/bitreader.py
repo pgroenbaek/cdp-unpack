@@ -24,9 +24,11 @@ SOFTWARE.
 
 class BitReader:
     """
-    Bits are consumed LSB-first.
+    Read bits from a byte sequence in least-significant-bit-first order.
 
-    Reading beyond EOF returns zero.
+    Individual bits and multi-bit values are read starting from the current
+    bit position. Reads past the end of the input return zero for the
+    unavailable bits.
     """
 
     def __init__(self, data: bytes):

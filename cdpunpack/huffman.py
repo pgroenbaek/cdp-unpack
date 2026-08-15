@@ -32,6 +32,23 @@ UNPROCESSED = 0xFFFFFFFE
 
 
 class AdaptiveHuffmanTree:
+    """
+    Adaptive Huffman tree for CDP symbol compression.
+
+    Implements a Gallager-Knuth-Vitter-style adaptive Huffman algorithm used by
+    the unpacker. The tree uses the sibling property, storing nodes in a flat array
+    ordered by non-decreasing frequency, with each internal node's children occupying
+    adjacent positions.
+
+    Leaf nodes store their symbol with a flag in the high bit of the child entry,
+    while internal nodes store the index of their left child; the right child is
+    implicitly the following node.
+
+    After each symbol, frequencies are propagated up the leaf-to-root path and
+    nodes are repositioned to preserve the frequency ordering. When the root
+    frequency exceeds the supported range, the tree is rebuilt by reducing leaf
+    frequencies.
+    """
 
     def __init__(self, num_symbols_raw: int):
         n = (num_symbols_raw + 1) & 0xFFE
