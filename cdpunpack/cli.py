@@ -25,6 +25,7 @@ SOFTWARE.
 import sys
 import argparse
 from pathlib import Path
+from typing import Optional
 
 from .cdp import parse_cdp, print_tag_tree, extract_document
 from .error import CdpError
@@ -46,7 +47,8 @@ def main() -> int:
     parser.add_argument(
         "output",
         type=Path,
-        help="output directory",
+        nargs="?",
+        help="output directory (required unless --list is used)",
     )
 
     parser.add_argument(
@@ -57,8 +59,11 @@ def main() -> int:
 
     args = parser.parse_args()
 
+    if not args.list and args.output is None:
+        parser.error("the following arguments are required unless '--list' is used: output")
+
     input_path: Path = args.input
-    output_path: Path = args.output
+    output_path: Optional[Path] = args.output
 
     if not input_path.is_file():
         print(
