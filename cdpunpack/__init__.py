@@ -24,9 +24,11 @@ SOFTWARE.
 
 __version__ = '0.0.1'
 __all__ = [
-    'parse_cdp', 'print_tag_tree', 'extract_document'
+    'parse_cdp', 'print_tag_tree', 'extract_document',
+    'CdpError'
 ]
 
 __author__ = 'Peter Grønbæk Andersen <peter@grnbk.io>'
 
 from .cdp import parse_cdp, print_tag_tree, extract_document
+from .error import CdpError
