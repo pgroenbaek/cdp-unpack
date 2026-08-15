@@ -34,6 +34,7 @@ from .lzss import decompress_lzss
 
 @dataclass
 class Tag:
+    """A parsed CDP tag and its type-specific value."""
     tag_type: int
     name: str
 
@@ -47,6 +48,7 @@ class Tag:
 
 @dataclass
 class CdpDocument:
+    """A parsed CDP document containing its header fields and top-level tags."""
     version: int
     reserved: int
     body_length: int
@@ -54,6 +56,19 @@ class CdpDocument:
 
 
 def read_uint32(data: bytes, offset: int) -> int:
+    """
+    Read an unsigned 32-bit little-endian integer.
+
+    Args:
+        data: Binary data to read from.
+        offset: Byte offset of the integer.
+
+    Returns:
+        The decoded integer.
+
+    Raises:
+        CdpError: If the data is truncated.
+    """
     if offset + 4 > len(data):
         raise CdpError("truncated uint32")
 
@@ -61,6 +76,19 @@ def read_uint32(data: bytes, offset: int) -> int:
 
 
 def read_int32(data: bytes, offset: int) -> int:
+    """
+    Read a signed 32-bit little-endian integer.
+
+    Args:
+        data: Binary data to read from.
+        offset: Byte offset of the integer.
+
+    Returns:
+        The decoded integer.
+
+    Raises:
+        CdpError: If the data is truncated.
+    """
     if offset + 4 > len(data):
         raise CdpError("truncated int32")
 
@@ -68,6 +96,19 @@ def read_int32(data: bytes, offset: int) -> int:
 
 
 def read_float32(data: bytes, offset: int) -> float:
+    """
+    Read a 32-bit little-endian floating-point value.
+
+    Args:
+        data: Binary data to read from.
+        offset: Byte offset of the value.
+
+    Returns:
+        The decoded value.
+
+    Raises:
+        CdpError: If the data is truncated.
+    """
     if offset + 4 > len(data):
         raise CdpError("truncated float32")
 
@@ -75,7 +116,17 @@ def read_float32(data: bytes, offset: int) -> float:
 
 
 def parse_tags(data: bytes, offset: int, end: int) -> List[Tag]:
+    """
+    Parse CDP tags from a section of binary data.
 
+    Args:
+        data: Binary CDP data.
+        offset: Start of the tag data.
+        end: End of the tag data.
+
+    Returns:
+        The parsed tags.
+    """
     tags: List[Tag] = []
 
     while offset + 6 <= end:
@@ -204,7 +255,18 @@ def parse_tags(data: bytes, offset: int, end: int) -> List[Tag]:
 
 
 def parse_cdp(data: bytes) -> CdpDocument:
+    """
+    Parse a CDP document from binary data.
 
+    Args:
+        data: Complete CDP file contents.
+
+    Returns:
+        The parsed CDP document.
+
+    Raises:
+        CdpError: If the CDP header or body is invalid.
+    """
     if len(data) < 16:
         raise CdpError("file is smaller than CDP header")
 
@@ -229,7 +291,16 @@ def parse_cdp(data: bytes) -> CdpDocument:
 
 
 def format_kuid(user_id: int, content_id: int) -> str:
+    """
+    Format a user ID and content ID as a KUID string.
 
+    Args:
+        user_id: Encoded user identifier.
+        content_id: Content identifier.
+
+    Returns:
+        The formatted KUID.
+    """
     flags = (user_id >> 22) & 0x3
     uid = user_id & 0x3FFFFF
 
@@ -240,7 +311,15 @@ def format_kuid(user_id: int, content_id: int) -> str:
 
 
 def tag_to_json(tag: Tag):
+    """
+    Convert a CDP tag to a JSON-compatible key-value pair.
 
+    Args:
+        tag: Tag to convert.
+
+    Returns:
+        A ``(name, value)`` pair, or ``None`` if the tag is omitted.
+    """
     if tag.tag_type == 0x00:
         obj = {}
 
@@ -301,7 +380,16 @@ def tag_to_json(tag: Tag):
 
 
 def build_config_json(asset_name: str, children: List[Tag]) -> bytes:
+    """
+    Build the JSON configuration for an asset.
 
+    Args:
+        asset_name: Asset name.
+        children: Asset child tags.
+
+    Returns:
+        UTF-8 encoded JSON data.
+    """
     obj = {
         "_container": asset_name,
         "_generated-by": "https://github.com/pgroenbaek/cdp-unpacker",
@@ -335,12 +423,17 @@ def build_config_json(asset_name: str, children: List[Tag]) -> bytes:
 
 def safe_component(component: str) -> str:
     """
-    Prevent absolute paths / traversal.
+    Sanitize a path component for safe filesystem use.
 
-    CDP names are normally simple Trainz asset names, KUIDs, filenames,
-    and directory names.
+    Args:
+        component: Path component to sanitize.
+
+    Returns:
+        The sanitized component.
+
+    Raises:
+        CdpError: If the component is empty or unsafe.
     """
-
     if not component:
         raise CdpError("empty path component")
 
@@ -370,7 +463,19 @@ def safe_component(component: str) -> str:
 
 
 def safe_join(root: Path, relative: str) -> Path:
+    """
+    Join a relative path to a root directory without escaping it.
 
+    Args:
+        root: Output root directory.
+        relative: Relative path to resolve.
+
+    Returns:
+        The resolved path.
+
+    Raises:
+        CdpError: If the path escapes the output root.
+    """
     parts = relative.replace("\\", "/").split("/")
 
     clean = []
@@ -394,7 +499,18 @@ def safe_join(root: Path, relative: str) -> Path:
 
 
 def decompress_file_blob(tag_name: str, data: bytes) -> bytes:
+    """Decompress a CDP file payload.
 
+    Args:
+        tag_name: File name used in error messages.
+        data: File payload including its uncompressed size prefix.
+
+    Returns:
+        The decompressed file data.
+
+    Raises:
+        CdpError: If the payload does not contain a size prefix.
+    """
     if len(data) < 4:
         raise CdpError(
             f"file {tag_name!r}: "
@@ -417,7 +533,18 @@ def extract_file_tree(
     output_root: Path,
     asset_label: str,
 ) -> int:
+    """
+    Recursively extract files from a CDP tag tree.
 
+    Args:
+        tags: Tags containing files or nested containers.
+        prefix_parts: Path components for the current tree level.
+        output_root: Root directory for extracted files.
+        asset_label: Asset name used in extraction output.
+
+    Returns:
+        The number of files extracted.
+    """
     count = 0
 
     for tag in tags:
@@ -477,7 +604,15 @@ def extract_file_tree(
 
 
 def find_files_container(children: List[Tag]) -> Optional[Tag]:
+    """
+    Find the files container among an asset's child tags.
 
+    Args:
+        children: Asset child tags.
+
+    Returns:
+        The files container, or ``None`` if not found.
+    """
     for tag in children:
         if tag.tag_type == 0x00 and tag.name == "files":
             return tag
@@ -486,7 +621,19 @@ def find_files_container(children: List[Tag]) -> Optional[Tag]:
 
 
 def extract_document(document: CdpDocument, output_root: Path) -> Tuple[int, int]:
+    """
+    Extract an entire CDP document to a directory.
 
+    Args:
+        document: Parsed CDP document.
+        output_root: Directory where assets will be written.
+
+    Returns:
+        A tuple containing the number of assets and files extracted.
+
+    Raises:
+        CdpError: If the document does not contain an assets container.
+    """
     assets_container = None
 
     for tag in document.tags:
@@ -549,7 +696,13 @@ def extract_document(document: CdpDocument, output_root: Path) -> Tuple[int, int
 
 
 def print_tag_tree(tags: List[Tag], depth: int = 0) -> None:
+    """
+    Print a hierarchical representation of parsed CDP tags.
 
+    Args:
+        tags: Tags to print.
+        depth: Current indentation depth.
+    """
     indent = "  " * depth
 
     for tag in tags:

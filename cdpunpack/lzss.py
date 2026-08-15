@@ -53,6 +53,19 @@ NUM_LIT_SYMBOLS = 273
 
 
 def mode_params(mode: int) -> Tuple[int, int, int]:
+    """
+    Return the distance parameters for an LZSS compression mode.
+
+    Args:
+        mode: LZSS compression mode.
+
+    Returns:
+        A tuple containing the total distance bits, number of distance
+        symbols, and number of extra distance bits.
+
+    Raises:
+        CdpError: If the compression mode is invalid.
+    """
     if mode == 0:
         return 8, 16, 4
 
@@ -72,8 +85,16 @@ def copy_match(
     max_size: int,
 ) -> None:
     """
-    Important: bytes are appended one at a time, which naturally permits
-    overlapping LZSS matches.
+    Copy an LZSS match into the output buffer.
+
+    Bytes are copied individually so that overlapping matches are handled
+    correctly.
+
+    Args:
+        output: Output buffer to append to.
+        distance: Backward distance from the current output position.
+        match_len: Number of bytes to copy.
+        max_size: Maximum output size.
     """
     for _ in range(match_len):
         if len(output) >= max_size:
@@ -94,7 +115,19 @@ def decompress_huffman(
     num_dist_symbols: int,
     dist_extra_bits: int,
 ) -> bytes:
+    """
+    Decompress an adaptive-Huffman encoded LZSS bitstream.
 
+    Args:
+        stream: Compressed bitstream.
+        uncompressed_size: Expected size of the decompressed data.
+        dist_bits_total: Number of bits used for the match distance.
+        num_dist_symbols: Number of symbols in the distance Huffman tree.
+        dist_extra_bits: Number of additional distance bits.
+
+    Returns:
+        The decompressed data.
+    """
     dist_mask = (1 << dist_bits_total) - 1
 
     lit_tree = AdaptiveHuffmanTree(NUM_LIT_SYMBOLS)
@@ -153,7 +186,18 @@ def decompress_bitstream(
     dist_bits_total: int,
     dist_extra_bits: int,
 ) -> bytes:
+    """
+    Decompress a non-Huffman LZSS bitstream.
 
+    Args:
+        stream: Compressed bitstream.
+        uncompressed_size: Expected size of the decompressed data.
+        dist_bits_total: Number of bits used for the match distance.
+        dist_extra_bits: Number of additional distance bits.
+
+    Returns:
+        The decompressed data.
+    """
     dist_mask = (1 << dist_bits_total) - 1
 
     if dist_bits_total < 16:
@@ -279,11 +323,25 @@ def decompress_bitstream(
     return bytes(output)
 
 
-def decompress_lzss(
-    compressed_data: bytes,
-    uncompressed_size: int,
-) -> bytes:
+def decompress_lzss(compressed_data: bytes, uncompressed_size: int) -> bytes:
+    """
+    Decompress an LZSS-compressed data blob.
 
+    The blob header selects the compression mode and level. Stored data,
+    regular bitstream compression, and adaptive-Huffman compression are
+    handled according to the header.
+
+    Args:
+        compressed_data: LZSS data including its compression header.
+        uncompressed_size: Expected size of the decompressed data.
+
+    Returns:
+        The decompressed data.
+
+    Raises:
+        CdpError: If the input is empty, uses an invalid mode, or produces
+            data with an unexpected size.
+    """
     if not compressed_data:
         raise CdpError("empty LZSS blob")
 
@@ -294,11 +352,7 @@ def decompress_lzss(
 
     # Stored.
     if level == 0:
-        end = min(
-            1 + uncompressed_size,
-            len(compressed_data),
-        )
-
+        end = min(1 + uncompressed_size, len(compressed_data))
         result = compressed_data[1:end]
 
         if len(result) != uncompressed_size:
@@ -321,7 +375,6 @@ def decompress_lzss(
             dist_bits_total,
             dist_extra_bits,
         )
-
     else:
         result = decompress_huffman(
             stream,
