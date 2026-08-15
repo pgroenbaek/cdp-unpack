@@ -58,7 +58,7 @@ pip install --upgrade ./cdp-unpack
 Use the `--list` parameter to list contents of a `.cdp` file, for example:
 
 ```ps1
-./cdpunpack.exe --list input.cdp
+.\cdpunpack.exe --list input.cdp
 ```
 
 ### Running as a Python module
@@ -86,7 +86,7 @@ asset_count, file_count = extract_document(
 )
 
 print(f"Extracted Assets: {asset_count}")
-print(f"Extracted Files:  {file_count}")
+print(f"Extracted Files: {file_count}")
 ```
 
 ## Building
@@ -108,7 +108,7 @@ pip install "nuitka[onefile]"
 Run the following command in PowerShell:
 
 ```ps1
-./tools/package_windows.ps1
+.\tools\package_windows.ps1
 ```
 
 #### Linux
