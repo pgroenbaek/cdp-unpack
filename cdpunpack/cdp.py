@@ -499,7 +499,8 @@ def safe_join(root: Path, relative: str) -> Path:
 
 
 def decompress_file_blob(tag_name: str, data: bytes) -> bytes:
-    """Decompress a CDP file payload.
+    """
+    Decompress a CDP file payload.
 
     Args:
         tag_name: File name used in error messages.

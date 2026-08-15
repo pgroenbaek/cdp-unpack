@@ -12,7 +12,7 @@ The CLI or Python module can be installed in the following ways:
 
 ### Install the standalone CLI executable
 
-Download the standalone CLI executable from the [Releases](https://github.com/pgroenbaek/cdp-unpack/releases) page for your operating system and extract it somewhere you can find it. See [#Usage] for how to use it.
+Download the standalone CLI executable from the [Releases](https://github.com/pgroenbaek/cdp-unpack/releases) page for your operating system, then extract it somewhere you can find it. See [Usage](#Usage) for details on how to use the CLI.
 
 ### Install the Python module from PyPI
 
@@ -39,19 +39,84 @@ pip install --upgrade ./cdp-unpack
 
 ## Usage
 
-### CLI
+### Running the CLI
 
+#### Windows
 
-### Python module
+```ps1
+./cdpunpack.exe input.cdp output_folder
+```
 
+#### Linux
+
+```bash
+./cdpunpack input.cdp output_folder
+```
+
+### Listing contents of archives
+
+Use the `--list` parameter to list contents of a `.cdp` file, for example:
+
+```ps1
+./cdpunpack.exe --list input.cdp
+```
+
+### Running as a Python module
+
+```bash
+python3 -m cdpunpack input.cdp output_folder
+```
+
+### Using the module in Python scripts
+
+```python
+from pathlib import Path
+from cdpunpack import parse_cdp, extract_document
+
+input_path: Path = Path("path/to/input.cdp")
+output_path: Path = Path("path/to/output")
+
+data = input_path.read_bytes()
+
+document = parse_cdp(data)
+
+asset_count, file_count = extract_document(
+    document,
+    output_path,
+)
+
+print(f"Extracted Assets: {asset_count}")
+print(f"Extracted Files:  {file_count}")
+```
 
 ## Building
 
 ### Prerequisites
 
+A Python 3.8+ installation is needed for building the module and standalone CLI executable.
+
+In addition, Nuitka is required for building the standalone CLI executable, install it from `pip` using:
+
 ```bash
-pip install nuitka
 pip install "nuitka[onefile]"
+```
+
+### Building the wheel and CLI executable:
+
+#### Windows
+
+Run the following command in PowerShell:
+
+```ps1
+./tools/package_windows.ps1
+```
+
+#### Linux
+
+Run the following command in a terminal:
+
+```bash
+./tools/package_linux.sh
 ```
 
 ## Running Tests
