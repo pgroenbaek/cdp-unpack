@@ -44,7 +44,7 @@ pip install --upgrade ./cdp-unpack
 #### Windows
 
 ```ps1
-./cdpunpack.exe input.cdp output_folder
+.\cdpunpack.exe input.cdp output_folder
 ```
 
 #### Linux
