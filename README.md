@@ -10,17 +10,19 @@ A cross-platform CLI and Python module for extracting files from CDP/CHUMP archi
 
 The CLI or Python module can be installed in the following ways:
 
-### Install the standalone CLI executable
+### Standalone CLI executable
 
-Download the standalone CLI executable from the [Releases](https://github.com/pgroenbaek/cdp-unpack/releases) page for your operating system, then extract it somewhere you can find it. See [Usage](#Usage) for details on how to use the CLI.
+Download the standalone CLI executable from the [Releases](https://github.com/pgroenbaek/cdp-unpack/releases) page for your operating system, then extract it somewhere you can find it.
 
-### Install the Python module from PyPI
+See [Usage](#Usage) for details on how to use the CLI.
+
+### Python module from PyPI
 
 ```sh
 pip install --upgrade cdpunpack
 ```
 
-### Install the Python module from wheel
+### Python module from wheel
 
 If you have downloaded a `.whl` file from the [Releases](https://github.com/pgroenbaek/cdp-unpack/releases) page, install it with:
 
@@ -30,7 +32,7 @@ pip install path/to/cdpunpack<version>‑py3‑none‑any.whl
 
 Replace `<version>` with the actual version number in the filename.
 
-### Install the Python module from source
+### Python module from source
 
 ```sh
 git clone https://github.com/pgroenbaek/cdp-unpack.git
