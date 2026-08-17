@@ -392,7 +392,7 @@ def build_config_json(asset_name: str, children: List[Tag]) -> bytes:
     """
     obj = {
         "_container": asset_name,
-        "_generated-by": "https://github.com/pgroenbaek/cdp-unpacker",
+        "_generated-by": "https://github.com/pgroenbaek/cdp-unpack",
     }
 
     for child in children:
@@ -557,29 +557,14 @@ def extract_file_tree(
             if len(tag.data) < 4:
                 continue
 
-            output_data = decompress_file_blob(
-                tag.name,
-                tag.data,
-            )
+            output_data = decompress_file_blob(tag.name, tag.data)
 
-            relative_parts = (
-                prefix_parts
-                + [tag.name]
-            )
+            relative_parts = prefix_parts + [tag.name]
+            relative = "/".join(relative_parts)
 
-            relative = "/".join(
-                relative_parts
-            )
+            destination = safe_join(output_root, relative)
 
-            destination = safe_join(
-                output_root,
-                relative,
-            )
-
-            destination.parent.mkdir(
-                parents=True,
-                exist_ok=True,
-            )
+            destination.parent.mkdir(parents=True, exist_ok=True)
 
             with destination.open("wb") as f:
                 f.write(output_data)
@@ -648,10 +633,7 @@ def extract_document(document: CdpDocument, output_root: Path) -> Tuple[int, int
     asset_count = 0
     file_count = 0
 
-    output_root.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
+    output_root.mkdir(parents=True, exist_ok=True)
 
     for asset in assets_container.children or []:
         if asset.tag_type != 0x00:
@@ -660,10 +642,7 @@ def extract_document(document: CdpDocument, output_root: Path) -> Tuple[int, int
         asset_name = safe_component(asset.name)
         asset_root = output_root / "assets" / asset_name
 
-        asset_root.mkdir(
-            parents=True,
-            exist_ok=True,
-        )
+        asset_root.mkdir(parents=True, exist_ok=True)
 
         children = asset.children or []
 
@@ -710,10 +689,7 @@ def print_tag_tree(tags: List[Tag], depth: int = 0) -> None:
         if tag.tag_type == 0x00:
             print(f"{indent}[CONTAINER] {tag.name}")
 
-            print_tag_tree(
-                tag.children or [],
-                depth + 1,
-            )
+            print_tag_tree(tag.children or [], depth + 1)
 
         elif tag.tag_type == 0x01:
             print(f"{indent}[INT] {tag.name}")

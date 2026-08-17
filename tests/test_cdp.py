@@ -630,7 +630,7 @@ def test_build_config_json():
 
     assert obj == {
         "_container": "my_asset",
-        "_generated-by": "https://github.com/pgroenbaek/cdp-unpacker",
+        "_generated-by": "https://github.com/pgroenbaek/cdp-unpack",
         "description": "Héllo",
     }
 

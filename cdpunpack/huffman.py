@@ -256,9 +256,7 @@ class AdaptiveHuffmanTree:
 
                     if (child & LEAF_FLAG) == 0:
                         if child + 1 >= self.total_nodes:
-                            raise CdpError(
-                                "invalid Huffman child during rebuild"
-                            )
+                            raise CdpError("invalid Huffman child during rebuild")
 
                         self.parent[child] += 1
                         self.parent[child + 1] += 1
@@ -267,9 +265,7 @@ class AdaptiveHuffmanTree:
                         symbol = child & ~LEAF_FLAG
 
                         if symbol >= self.num_leaves:
-                            raise CdpError(
-                                "invalid Huffman symbol during rebuild"
-                            )
+                            raise CdpError("invalid Huffman symbol during rebuild")
 
                         self.symbol_to_node[symbol] += 1
 
@@ -308,16 +304,12 @@ class AdaptiveHuffmanTree:
                     child = self.child[scan_position]
 
                     if (child & LEAF_FLAG) == 0:
-                        raise CdpError(
-                            "leaf promotion encountered non-leaf"
-                        )
+                        raise CdpError("leaf promotion encountered non-leaf")
 
                     symbol = child & ~LEAF_FLAG
 
                     if symbol >= self.num_leaves:
-                        raise CdpError(
-                            "invalid symbol during leaf promotion"
-                        )
+                        raise CdpError("invalid symbol during leaf promotion")
 
                     self.symbol_to_node[symbol] = destination
 
@@ -327,7 +319,7 @@ class AdaptiveHuffmanTree:
                     next_destination += 1
 
                     node_scan = next_destination
-
+                    
                     remaining_leaves -= 1
 
                     if remaining_leaves <= 0:
