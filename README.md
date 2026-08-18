@@ -159,4 +159,4 @@ This project is a Python port/adaptation of the extraction-portion of [cdptool](
 
 The original code is Copyright (c) 2026 cdptool contributors and is licensed under the MIT License.
 
-This Python implementation is released under the [MIT License](https://github.com/pgroenbaek/cdp-unpack/blob/master/LICENSE).
+This Python implementation is also released under the [MIT License](https://github.com/pgroenbaek/cdp-unpack/blob/master/LICENSE).
