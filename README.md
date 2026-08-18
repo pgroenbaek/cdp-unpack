@@ -155,5 +155,8 @@ tox
 This will execute tests for all Python versions specified in `tox.ini`.
 
 ## License
+This project is a Python port/adaptation of the extraction-portion of [cdptool](https://github.com/emmaworley/cdptool).
 
-The Python module and CLI is licensed under the [MIT license](https://github.com/pgroenbaek/cdp-unpack/blob/master/LICENSE).
+The original code is Copyright (c) 2026 cdptool contributors and is licensed under the MIT License.
+
+This Python implementation is released under the [MIT License](https://github.com/pgroenbaek/cdp-unpack/blob/master/LICENSE).

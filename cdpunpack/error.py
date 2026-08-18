@@ -23,5 +23,5 @@ SOFTWARE.
 """
 
 class CdpError(Exception):
-    """Exception raised when CDP input data is malformed or cannot be unpacked correctly."""
+    """Raised when CDP input data is malformed or cannot be unpacked correctly."""
     pass

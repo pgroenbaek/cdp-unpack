@@ -1,6 +1,7 @@
 """
 This file is part of CdpUnpack.
 
+Copyright (c) 2026 cdptool contributors
 Copyright (C) 2026 Peter Grønbæk Andersen <peter@grnbk.io>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
