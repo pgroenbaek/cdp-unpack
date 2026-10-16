@@ -23,12 +23,13 @@ SOFTWARE.
 """
 
 import pytest
+from typing import List
 
 from cdpunpack.huffman import AdaptiveHuffmanTree
 from cdpunpack.bitreader import BitReader
 
 
-def encode_symbols(tree: AdaptiveHuffmanTree, symbols: list[int]) -> bytes:
+def encode_symbols(tree: AdaptiveHuffmanTree, symbols: List[int]) -> bytes:
     bits = []
 
     for symbol in symbols:

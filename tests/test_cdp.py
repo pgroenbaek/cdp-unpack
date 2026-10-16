@@ -25,6 +25,7 @@ SOFTWARE.
 import pytest
 import json
 import struct
+from typing import Optional
 
 from cdpunpack.cdp import (
     CdpDocument,
@@ -112,7 +113,7 @@ def make_cdp(
     *tags: bytes,
     version: int = 1,
     reserved: int = 0,
-    body_length: int | None = None,
+    body_length: Optional[int] = None,
 ) -> bytes:
     body = b"".join(tags)
 

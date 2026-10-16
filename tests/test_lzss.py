@@ -23,6 +23,7 @@ SOFTWARE.
 """
 
 import pytest
+from typing import List, Tuple, Optional, Union
 
 from cdpunpack.error import CdpError
 from cdpunpack.bitreader import BitReader
@@ -37,7 +38,7 @@ from cdpunpack.lzss import (
 )
 
 
-def pack_bits(bits: list[int]) -> bytes:
+def pack_bits(bits: List[int]) -> bytes:
     """
     Pack bits LSB-first, matching BitReader.
     """
@@ -50,11 +51,11 @@ def pack_bits(bits: list[int]) -> bytes:
     return bytes(result)
 
 
-def bits_for_byte(value: int) -> list[int]:
+def bits_for_byte(value: int) -> List[int]:
     return [(value >> i) & 1 for i in range(8)]
 
 
-def make_mode0_stream(items: list[tuple[str, int, int | None]]) -> bytes:
+def make_mode0_stream(items: List[Tuple[str, int, Optional[int]]]) -> bytes:
     """
     Build a mode-0 bitstream.
 
@@ -123,7 +124,7 @@ def make_mode12_literal_stream(data: bytes) -> bytes:
 
 
 def make_mode12_stream(
-    items: list[tuple[str, int, int | bytes | None]],
+    items: List[Tuple[str, int, Optional[Union[int, bytes]]]],
 ) -> bytes:
     """
     Build one mode-1/mode-2 bitstream block.
@@ -192,7 +193,7 @@ def make_mode12_stream(
     return pack_bits(flags) + pack_bits(payload)
 
 
-def huffman_symbol_bits(tree: AdaptiveHuffmanTree, symbol: int) -> list[int]:
+def huffman_symbol_bits(tree: AdaptiveHuffmanTree, symbol: int) -> List[int]:
     """
     Return the current tree path used to decode `symbol`.
     """
@@ -240,7 +241,7 @@ def make_huffman_literal_stream(
 
 
 def make_huffman_symbol_stream(
-    symbols: list[int],
+    symbols: List[int],
     num_dist_symbols: int = 16,
 ) -> bytes:
     """
