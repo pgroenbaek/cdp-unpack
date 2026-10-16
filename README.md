@@ -27,7 +27,7 @@ pip install --upgrade cdpunpack
 If you have downloaded a `.whl` file from the [Releases](https://github.com/pgroenbaek/cdp-unpack/releases) page, install it with:
 
 ```sh
-pip install path/to/cdpunpack<version>‑py3‑none‑any.whl
+pip install path/to/cdpunpack-<version>‑py3‑none‑any.whl
 ```
 
 Replace `<version>` with the actual version number in the filename.
